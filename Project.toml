@@ -1,0 +1,19 @@
+name = "PowerVega"
+uuid = "14ca4659-f966-44d1-b334-6ce7fa9da616"
+authors = ["noahrhodes <noahx23@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+InfrastructureModels = "2030c09a-7f63-5d83-885d-db604e0e9cc0"
+LightGraphs = "093fc24a-ae57-5d10-9952-331d41423f4d"
+PowerModels = "c36e90e8-916a-50a6-bd94-075b64ef4655"
+PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
+VegaDatasets = "0ae4a718-28b7-58ec-9efb-cded64d6d5b4"
+VegaLite = "112f6efa-9a02-5b7d-90c0-432ed331239a"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
