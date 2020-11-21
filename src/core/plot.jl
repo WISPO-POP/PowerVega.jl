@@ -1,7 +1,7 @@
 
 
-using Colors
-properties = Dict("color" => Dict("bus" => colorant"green", "gen" => colorant"blue"))
+# using Colors
+# properties = Dict("color" => Dict("bus" => colorant"green", "gen" => colorant"blue"))
 
 function plot_network(case)
     layout_graph_vega!(case)
@@ -23,18 +23,6 @@ function plot_network(case)
                     :blue,
                     :red,
                     :gray
-                    # "rgb(137,78,36)",
-                    # "rgb(220,36,30)",
-                    # "rgb(255,206,0)",
-                    # "rgb(1,114,41)",
-                    # "rgb(0,175,173)",
-                    # "rgb(215,153,175)",
-                    # "rgb(106,114,120)",
-                    # "rgb(114,17,84)",
-                    # "rgb(0,0,0)",
-                    # "rgb(0,24,168)",
-                    # "rgb(0,160,226)",
-                    # "rgb(106,187,170)"
                 ]
             }
         },
@@ -46,10 +34,10 @@ function plot_network(case)
             opacity =  1.0
         },
         data=df["branch"],
-        x = :x,
-        x2 = :x2,
-        y = :y,
-        y2 = :y2,
+        x = :xcoord_1,
+        x2 = :xcoord_2,
+        y = :ycoord_1,
+        y2 = :ycoord_2,
         size={value=5},
     ) +
     @vlplot(
@@ -60,10 +48,10 @@ function plot_network(case)
             opacity =  1.0
         },
         data=df["connector"],
-        x = :x,
-        x2 = :x2,
-        y = :y,
-        y2 = :y2,
+        x = :xcoord_1,
+        x2 = :xcoord_2,
+        y = :ycoord_1,
+        y2 = :ycoord_2,
         size={value=3},
         strokeDash={value=[4,4]}
     ) +
@@ -74,8 +62,8 @@ function plot_network(case)
             "tooltip" =("content" => "data"),
             opacity =  1.0
         },
-        x={:x,},
-        y={:y,},
+        x={:xcoord_1,},
+        y={:ycoord_1,},
         size={value=1e2},
     )+
     @vlplot(
@@ -85,8 +73,129 @@ function plot_network(case)
             "tooltip" =("content" => "data"),
             opacity =  1.0
         },
-        x={:x,},
-        y={:y,},
+        x={:xcoord_1,},
+        y={:ycoord_1,},
+        size={value=5e1},
+    )
+    return p
+end
+
+
+function plot_power_flow(case)
+
+    for (gen_id,gen) in case["gen"]
+        if !haskey(gen,"pg")
+            @warn "Generator $(gen_id) does not have key `pg`"
+        end
+    end
+    for (branch_id,branch) in case["branch"]
+        if !haskey(branch,"pt")
+            @warn "Branch $(branch_id) does not have key `pt`"
+        end
+        if !haskey(branch,"pf")
+            @warn "Branch $(branch_id) does not have key `pf`"
+        end
+    end
+    for (bus_id,bus) in case["bus"]
+        if !haskey(bus,"vm")
+            @warn "Bus $(bus_id) does not have key `vm`"
+        end
+    end
+
+
+    layout_graph_vega!(case)
+    df = form_df(case)
+    p = @vlplot(
+        width=500,
+        height=500,
+        config={view={stroke=nothing}},
+        x={axis=nothing},
+        y={axis=nothing},
+        color={"PercentRated:q",scale={"range"= ["black", "gray", "red"]},title="Percent of Rated Capacity"}
+        # color={
+        #     :ComponentType,
+        #     scale={
+        #         domain=[
+        #             "branch","bus","gen","connector",
+        #         ],
+        #         range=[
+        #             :green,
+        #             :blue,
+        #             :red,
+        #             :gray
+        #         ]
+        #     }
+        # },
+    ) +
+    @vlplot(
+        mark ={
+            :rule,
+            "tooltip" =("content" => "data"),
+            opacity =  1.0
+        },
+        data=df["branch"],
+        transform=[
+            {
+                calculate="abs(datum.pf) /datum.rate_a * 100",
+                as="PercentRated"
+            }
+        ],
+        x = :xcoord_1,
+        x2 = :xcoord_2,
+        y = :ycoord_1,
+        y2 = :ycoord_2,
+        # color = "PercentRated:q",
+        size={value=5},
+        # color={"PercentRated:q",scale={scheme=:magma, extent=[0.0,0.6]},title="Percent of Rated Capacity"}
+    ) +
+    @vlplot(
+        mark ={
+            :rule,
+            "tooltip" =("content" => "data"),
+            # "tooltip" = true,
+            opacity =  1.0
+        },
+        data=df["connector"],
+        x = :xcoord_1,
+        x2 = :xcoord_2,
+        y = :ycoord_1,
+        y2 = :ycoord_2,
+        size={value=3},
+        strokeDash={value=[4,4]},
+        color={value="gray"}
+    ) +
+    @vlplot(
+        data = df["bus"],
+        transform=[
+            {
+                calculate="abs(datum.vm) /( datum.vmax+datum.vmin) * 100",
+                as="PercentRated"
+            }
+        ],
+        mark ={
+            :circle,
+            "tooltip" =("content" => "data"),
+            opacity =  1.0
+        },
+        x={:xcoord_1,},
+        y={:ycoord_1,},
+        size={value=1e2},
+    )+
+    @vlplot(
+        data = df["gen"],
+        transform=[
+            {
+                calculate="abs(datum.pg) /datum.pmax * 100",
+                as="PercentRated"
+            }
+        ],
+        mark ={
+            :circle,
+            "tooltip" =("content" => "data"),
+            opacity =  1.0
+        },
+        x={:xcoord_1,},
+        y={:ycoord_1,},
         size={value=5e1},
     )
     return p

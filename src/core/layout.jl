@@ -71,18 +71,18 @@ function layout_graph_vega!(case::Dict{String,Any};
     # Set Node Positions
     for (node, (x, y)) in positions
         (comp_type,comp_id) = split(node, "_")
-        case[comp_type][comp_id]["x"] = x
-        case[comp_type][comp_id]["y"] = y
+        case[comp_type][comp_id]["xcoord_1"] = x
+        case[comp_type][comp_id]["ycoord_1"] = y
     end
     # Set Edge positions
     for (edge, val) in (edge_comp_map)
         (x,y) = positions[val["src"]]
         (x2,y2) = positions[val["dst"]]
         (comp_type,comp_id) = split(edge, "_")
-        case[comp_type][comp_id]["x"] = x
-        case[comp_type][comp_id]["y"] = y
-        case[comp_type][comp_id]["x2"] = x2
-        case[comp_type][comp_id]["y2"] = y2
+        case[comp_type][comp_id]["xcoord_1"] = x
+        case[comp_type][comp_id]["ycoord_1"] = y
+        case[comp_type][comp_id]["xcoord_2"] = x2
+        case[comp_type][comp_id]["ycoord_2"] = y2
     end
 
     # Create connector dictionary
@@ -92,10 +92,10 @@ function layout_graph_vega!(case::Dict{String,Any};
         case["connector"][id]=  Dict(
             "src" => con["src"],
             "dst" => con["dst"],
-            "x" => 0.0,
-            "y" => 0.0,
-            "x2" => 0.0,
-            "y2" => 0.0,
+            "xcoord_1" => 0.0,
+            "ycoord_1" => 0.0,
+            "xcoord_2" => 0.0,
+            "ycoord_2" => 0.0,
         )
     end
     # Set Connector positions
@@ -103,9 +103,9 @@ function layout_graph_vega!(case::Dict{String,Any};
         (x,y) = positions[val["src"]]
         (x2,y2) = positions[val["dst"]]
         (comp_type,comp_id) = split(edge, "_")
-        case[comp_type][comp_id]["x"] = x
-        case[comp_type][comp_id]["y"] = y
-        case[comp_type][comp_id]["x2"] = x2
-        case[comp_type][comp_id]["y2"] = y2
+        case[comp_type][comp_id]["xcoord_1"] = x
+        case[comp_type][comp_id]["ycoord_1"] = y
+        case[comp_type][comp_id]["xcoord_2"] = x2
+        case[comp_type][comp_id]["ycoord_2"] = y2
     end
 end
