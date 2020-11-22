@@ -1,6 +1,6 @@
 
 
-function layout_graph_vega(case::Dict{String,Any};
+function layout_graph_vega(case::Dict{String,Any}, spring_const;
     node_types::Array{String,1} = ["bus","gen","storage"],
     edge_types::Array{String,1} = ["switch","branch","dcline","transformer"],
     )
@@ -77,7 +77,7 @@ function layout_graph_vega(case::Dict{String,Any};
                 @show pos[v]
             end
         end
-        spring_const = 1e-5
+        # spring_const = 1e-2
         k=spring_const*minimum(std([p for p in values(pos)]))
         positions = nx.spring_layout(G; pos,  fixed, k,  iterations=100)
         # positions = pos

@@ -1,6 +1,6 @@
 
-function plot_network(case)
-    data = layout_graph_vega(case)
+function plot_network(case, spring_constant=1e-3)
+    data = layout_graph_vega(case, spring_constant)
     remove_information!(data)
     df = form_df(data)
     p = @vlplot(
@@ -77,7 +77,7 @@ function plot_network(case)
 end
 
 
-function plot_power_flow(case)
+function plot_power_flow(case;spring_constant=1e-3)
 
     for (gen_id,gen) in case["gen"]
         if !haskey(gen,"pg")
@@ -99,7 +99,7 @@ function plot_power_flow(case)
     end
 
 
-    data = layout_graph_vega(case)
+    data = layout_graph_vega(case,spring_constant)
     remove_information!(data)
     df = form_df(data)
     p = @vlplot(
@@ -202,7 +202,7 @@ function remove_information!(data)
 end
 
 
-function plot_power_flow_geo(case)
+function plot_power_flow_geo(case; spring_constant = 1e-3)
 
     for (gen_id,gen) in case["gen"]
         if !haskey(gen,"pg")
@@ -224,7 +224,7 @@ function plot_power_flow_geo(case)
     end
 
 
-    data = layout_graph_vega(case)
+    data = layout_graph_vega(case,spring_constant)
     remove_information!(data)
     df = form_df(data)
     p = @vlplot(
