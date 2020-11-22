@@ -310,3 +310,24 @@ function plot_power_flow_geo(case; spring_constant = 1e-3)
     )
     return p
 end
+
+
+function plot_WI(WI)
+    p =  @vlplot(width=500, height=300) +
+     @vlplot(
+         mark={
+             :geoshape,
+             fill=:lightgray,
+             stroke=:white
+         },
+         data={
+             values= WI,
+             format={
+                 type=:topojson,
+                 feature=:cb_2015_wisconsin_county_20m
+             }
+         },
+         projection={type=:albersUsa},
+     )
+     return p
+ end
