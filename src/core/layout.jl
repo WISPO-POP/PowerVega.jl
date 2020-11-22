@@ -74,7 +74,6 @@ function layout_graph_vega(case::Dict{String,Any}, spring_const;
                 x1 = get(get(data["bus"],string(get(case[comp_type][comp_id],"$(comp_type)_bus", NaN)),Dict()),"xcoord_1", avg_x)
                 y1 = get(get(data["bus"],string(get(case[comp_type][comp_id],"$(comp_type)_bus", NaN)),Dict()),"ycoord_1", avg_x)
                 pos[v] = [x1,y1] + [std_x*(rand()-0.5), std_y*(rand()-0.5)]*300
-                @show pos[v]
             end
         end
         # spring_const = 1e-2

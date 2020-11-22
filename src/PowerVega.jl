@@ -2,19 +2,14 @@ module PowerVega
 
 import InfrastructureModels
 import PowerModels
-import Statistics: mean, std
-# import LinearAlgebra: norm
-import LightGraphs
+using Statistics, LightGraphs
 
-# import Colors
-# import Colors: @colorant_str
 
-using VegaLite
-# using VegaDatasets
+
+using VegaLite, VegaDatasets
 using DataFrames
-# import Plots
-
-# using NetworkLayout
+using JSON
+using FilePaths
 
 import PyCall
 const nx = PyCall.PyNULL()
@@ -29,27 +24,9 @@ end
 include("core/data.jl")
 include("core/layout.jl")
 include("core/plot.jl")
-# include("core/types.jl")  # must be first to properly define new types
-# include("core/data.jl")
-# include("core/options.jl")
 
-# include("plots/graph.jl")
-# include("plots/network_status.jl")
-# include("plots/power_flow.jl")
-# include("plots/system_voltage.jl")
-# include("plots/networks.jl")
-
-# include("plots/power_vega.jl")
-
-# include("layouts/common.jl")
-# include("layouts/layout_engines.jl")
-
-# include("graph/common.jl")
 
 include("core/export.jl")  # must be last to properly export all functions
-
-
-
 
 
 end # module
