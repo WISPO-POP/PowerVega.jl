@@ -4,7 +4,7 @@
 # const edge_types = ["switch","branch","dcline","transformer"]
 
 
-function layout_graph_vega!(case::Dict{String,Any};
+function layout_graph_vega(case::Dict{String,Any};
     node_types::Array{String,1} = ["bus","gen","storage"],
     edge_types::Array{String,1} = ["switch","branch","dcline","transformer"],
     )
@@ -43,17 +43,17 @@ function layout_graph_vega!(case::Dict{String,Any};
         end
     end
 
-    # for node_type in node_types
-    #     if node_type != "bus"
-    #         connector_edge = get(data, node_type, Dict())
-    #         for (id,edge) in connector_edge
-    #             edge["src"] = string(edge["source_id"][1],"_",edge["source_id"][2])
-    #             edge["dst"] = string("bus_",data["bus"][string(edge["$(node_type)_bus"])]["index"])
-    #         end
-    #         connector_map = Dict(string(comp["source_id"][1],"_",comp["source_id"][2],"_connector") => comp  for (comp_id, comp) in connector_edge)
-    #         merge!(edge_comp_map,connector_map)
-    #     end
-    # end
+
+    # find fixed positions of nodes
+    pos = Dict()
+    for (id,node) in node_comp_map
+        if haskey(node, "xcoord_1") && haskey(node, "ycoord_1")
+            pos[id] = [node["xcoord_1"], node["ycoord_1"]]
+        else
+            pos[id] = missing
+        end
+    end
+    fixed = [node for (node, p) in pos if !ismissing(p)]
 
     G = nx.Graph()
     for (id,node) in node_comp_map
@@ -63,33 +63,52 @@ function layout_graph_vega!(case::Dict{String,Any};
         G.add_edge(edge["src"], edge["dst"], weight=1.0)
     end
     for (id,edge) in connector_map
-        G.add_edge(edge["src"], edge["dst"], weight=0.2)
+        G.add_edge(edge["src"], edge["dst"], weight=0.5)
     end
 
-    positions = nx.kamada_kawai_layout(G, dist=nothing, pos=nothing, weight="weight", scale=1.0, center=nothing, dim=2)
+    if isempty(fixed)
+        positions = nx.kamada_kawai_layout(G, dist=nothing, pos=nothing, weight="weight", scale=1.0, center=nothing, dim=2)
+    else
+        avg_x, avg_y = mean(hcat(skipmissing([v for v in values(pos)])...), dims=2)
+        std_x, std_y = std(hcat(skipmissing([v for v in values(pos)])...), dims=2)
+        for (v, p) in pos
+            if ismissing(p)
+                #get parent bus coord, or center of figure
+                comp_type, comp_id = split(v, "_")
+                x1 = get(get(data["bus"],string(get(case[comp_type][comp_id],"$(comp_type)_bus", NaN)),Dict()),"xcoord_1", avg_x)
+                y1 = get(get(data["bus"],string(get(case[comp_type][comp_id],"$(comp_type)_bus", NaN)),Dict()),"ycoord_1", avg_x)
+                pos[v] = [x1,y1] + [std_x*(rand()-0.5), std_y*(rand()-0.5)]
+                @show pos[v]
+            end
+        end
+        spring_const = 1e-5
+        k=spring_const*minimum(std([p for p in values(pos)]))
+        positions = nx.spring_layout(G; pos,  fixed, k,  iterations=100)
+        # positions = pos
+    end
 
     # Set Node Positions
     for (node, (x, y)) in positions
         (comp_type,comp_id) = split(node, "_")
-        case[comp_type][comp_id]["xcoord_1"] = x
-        case[comp_type][comp_id]["ycoord_1"] = y
+        data[comp_type][comp_id]["xcoord_1"] = x
+        data[comp_type][comp_id]["ycoord_1"] = y
     end
     # Set Edge positions
     for (edge, val) in (edge_comp_map)
         (x,y) = positions[val["src"]]
         (x2,y2) = positions[val["dst"]]
         (comp_type,comp_id) = split(edge, "_")
-        case[comp_type][comp_id]["xcoord_1"] = x
-        case[comp_type][comp_id]["ycoord_1"] = y
-        case[comp_type][comp_id]["xcoord_2"] = x2
-        case[comp_type][comp_id]["ycoord_2"] = y2
+        data[comp_type][comp_id]["xcoord_1"] = x
+        data[comp_type][comp_id]["ycoord_1"] = y
+        data[comp_type][comp_id]["xcoord_2"] = x2
+        data[comp_type][comp_id]["ycoord_2"] = y2
     end
 
     # Create connector dictionary
-    case["connector"] = Dict()
+    data["connector"] = Dict()
     for (edge, con) in connector_map
         _,id = split(edge, "_")
-        case["connector"][id]=  Dict(
+        data["connector"][id]=  Dict(
             "src" => con["src"],
             "dst" => con["dst"],
             "xcoord_1" => 0.0,
@@ -103,9 +122,11 @@ function layout_graph_vega!(case::Dict{String,Any};
         (x,y) = positions[val["src"]]
         (x2,y2) = positions[val["dst"]]
         (comp_type,comp_id) = split(edge, "_")
-        case[comp_type][comp_id]["xcoord_1"] = x
-        case[comp_type][comp_id]["ycoord_1"] = y
-        case[comp_type][comp_id]["xcoord_2"] = x2
-        case[comp_type][comp_id]["ycoord_2"] = y2
+        data[comp_type][comp_id]["xcoord_1"] = x
+        data[comp_type][comp_id]["ycoord_1"] = y
+        data[comp_type][comp_id]["xcoord_2"] = x2
+        data[comp_type][comp_id]["ycoord_2"] = y2
     end
+
+    return data
 end

@@ -2,7 +2,7 @@ module PowerVega
 
 import InfrastructureModels
 import PowerModels
-# import Statistics: mean, std
+import Statistics: mean, std
 # import LinearAlgebra: norm
 import LightGraphs
 
@@ -10,7 +10,7 @@ import LightGraphs
 # import Colors: @colorant_str
 
 using VegaLite
-using VegaDatasets
+# using VegaDatasets
 using DataFrames
 # import Plots
 

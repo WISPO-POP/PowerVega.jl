@@ -4,8 +4,8 @@
 # properties = Dict("color" => Dict("bus" => colorant"green", "gen" => colorant"blue"))
 
 function plot_network(case)
-    layout_graph_vega!(case)
-    df = form_df(case)
+    data = layout_graph_vega(case)
+    df = form_df(data)
     p = @vlplot(
         width=500,
         height=500,
@@ -103,29 +103,15 @@ function plot_power_flow(case)
     end
 
 
-    layout_graph_vega!(case)
-    df = form_df(case)
+    data = layout_graph_vega(case)
+    df = form_df(data)
     p = @vlplot(
         width=500,
         height=500,
         config={view={stroke=nothing}},
         x={axis=nothing},
         y={axis=nothing},
-        color={"PercentRated:q",scale={"range"= ["black", "gray", "red"]},title="Percent of Rated Capacity"}
-        # color={
-        #     :ComponentType,
-        #     scale={
-        #         domain=[
-        #             "branch","bus","gen","connector",
-        #         ],
-        #         range=[
-        #             :green,
-        #             :blue,
-        #             :red,
-        #             :gray
-        #         ]
-        #     }
-        # },
+        color={"PercentRated:q",scale={"range"= ["black", "black", "red"]},title="Percent of Rated Capacity"}
     ) +
     @vlplot(
         mark ={
@@ -144,15 +130,12 @@ function plot_power_flow(case)
         x2 = :xcoord_2,
         y = :ycoord_1,
         y2 = :ycoord_2,
-        # color = "PercentRated:q",
         size={value=5},
-        # color={"PercentRated:q",scale={scheme=:magma, extent=[0.0,0.6]},title="Percent of Rated Capacity"}
     ) +
     @vlplot(
         mark ={
             :rule,
             "tooltip" =("content" => "data"),
-            # "tooltip" = true,
             opacity =  1.0
         },
         data=df["connector"],
@@ -173,13 +156,15 @@ function plot_power_flow(case)
             }
         ],
         mark ={
-            :circle,
+            :point,
             "tooltip" =("content" => "data"),
-            opacity =  1.0
+            opacity =  1.0,
+            filled=true
         },
         x={:xcoord_1,},
         y={:ycoord_1,},
-        size={value=1e2},
+        size={value=2e2},
+        shape="ComponentType"
     )+
     @vlplot(
         data = df["gen"],
@@ -190,13 +175,15 @@ function plot_power_flow(case)
             }
         ],
         mark ={
-            :circle,
+            :point,
             "tooltip" =("content" => "data"),
-            opacity =  1.0
+            opacity =  1.0,
+            filled=true
         },
         x={:xcoord_1,},
         y={:ycoord_1,},
         size={value=5e1},
+        shape="ComponentType"
     )
     return p
 end
