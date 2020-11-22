@@ -1,9 +1,5 @@
 
 
-# const node_types = ["bus","gen","storage"]
-# const edge_types = ["switch","branch","dcline","transformer"]
-
-
 function layout_graph_vega(case::Dict{String,Any};
     node_types::Array{String,1} = ["bus","gen","storage"],
     edge_types::Array{String,1} = ["switch","branch","dcline","transformer"],
@@ -63,7 +59,7 @@ function layout_graph_vega(case::Dict{String,Any};
         G.add_edge(edge["src"], edge["dst"], weight=1.0)
     end
     for (id,edge) in connector_map
-        G.add_edge(edge["src"], edge["dst"], weight=0.5)
+        G.add_edge(edge["src"], edge["dst"], weight=1.0)
     end
 
     if isempty(fixed)
@@ -77,7 +73,7 @@ function layout_graph_vega(case::Dict{String,Any};
                 comp_type, comp_id = split(v, "_")
                 x1 = get(get(data["bus"],string(get(case[comp_type][comp_id],"$(comp_type)_bus", NaN)),Dict()),"xcoord_1", avg_x)
                 y1 = get(get(data["bus"],string(get(case[comp_type][comp_id],"$(comp_type)_bus", NaN)),Dict()),"ycoord_1", avg_x)
-                pos[v] = [x1,y1] + [std_x*(rand()-0.5), std_y*(rand()-0.5)]
+                pos[v] = [x1,y1] + [std_x*(rand()-0.5), std_y*(rand()-0.5)]*300
                 @show pos[v]
             end
         end
