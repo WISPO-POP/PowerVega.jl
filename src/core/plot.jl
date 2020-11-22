@@ -5,6 +5,7 @@
 
 function plot_network(case)
     data = layout_graph_vega(case)
+    remove_information!(data)
     df = form_df(data)
     p = @vlplot(
         width=500,
@@ -30,7 +31,7 @@ function plot_network(case)
     @vlplot(
         mark ={
             :rule,
-            "tooltip" =("content" => "data"),
+            tooltip=("content" => "data"),
             opacity =  1.0
         },
         data=df["branch"],
@@ -39,6 +40,7 @@ function plot_network(case)
         y = :ycoord_1,
         y2 = :ycoord_2,
         size={value=5},
+        # tooltip={"xcoord_1:n"},
     ) +
     @vlplot(
         mark ={
@@ -104,6 +106,7 @@ function plot_power_flow(case)
 
 
     data = layout_graph_vega(case)
+    remove_information!(data)
     df = form_df(data)
     p = @vlplot(
         width=500,
@@ -186,4 +189,24 @@ function plot_power_flow(case)
         shape="ComponentType"
     )
     return p
+end
+
+function remove_information!(data)
+    # valid_keys = Dict("branch"  => ["xcoord_1", "xcoord_2", "ycoord_1", "ycoord_2", "pf", "src","dst","rate_a","index"], #["br_r", "mu_angmin", "mu_angmax", "rate_a", "mu_sf", "shift", "rate_b", "pt", "br_x", "rate_c", "g_to", "g_fr", "mu_st", "source_id", "f_bus", "b_fr", "br_status", "t_bus", "b_to", "index", "qf", "angmin", "angmax", "qt", "transformer", "tap", "pf"]
+    #                   "bus"     => ["xcoord_1", "ycoord_1", "bus_type", "name", "vmax",  "vmin", "index", "va", "vm", "base_kv"], #"mu_vmax", "lam_q", "mu_vmin", "source_id", "area","lam_p","zone", "bus_i",
+    #                   "gen"     => ["xcoord_1", "ycoord_1",  "pg", "qg", "gen_bus", "pmax",  "vg", "mbase", "index", "cost", "qmax", "gen_status", "qmin", "pmin", ] #"ncost", "qc1max","qc2max", "ramp_agc", "qc1min", "qc2min", "pc1", "ramp_q", "mu_qmax", "ramp_30", "mu_qmin","model", "shutdown", "startup","ramp_10","source_id", "mu_pmax", "pc2", "mu_pmin","apf",
+    # )
+    invalid_keys = Dict("branch"  => ["br_r", "mu_angmin", "mu_angmax", "mu_sf", "shift", "rate_b", "br_x", "rate_c", "g_to", "g_fr", "mu_st", "source_id", "f_bus", "b_fr", "br_status", "t_bus", "b_to", "qf", "angmin", "angmax", "qt", "transformer", "tap"],#["xcoord_1", "xcoord_2", "ycoord_1", "ycoord_2", "pf", "src","dst","rate_a","index"],
+                        "bus"     => ["mu_vmax", "lam_q", "mu_vmin", "source_id", "area","lam_p","zone", "bus_i"],#["xcoord_1", "ycoord_1", "bus_type", "name", "vmax",  "vmin", "index", "va", "vm", "base_kv"],
+                        "gen"     => ["ncost", "qc1max","qc2max", "ramp_agc", "qc1min", "qc2min", "pc1", "ramp_q", "mu_qmax", "ramp_30", "mu_qmin","model", "shutdown", "startup","ramp_10","source_id", "mu_pmax", "pc2", "mu_pmin","apf",],#["xcoord_1", "ycoord_1",  "pg", "qg", "gen_bus", "pmax",  "vg", "mbase", "index", "cost", "qmax", "gen_status", "qmin", "pmin", ]
+    )
+    for comp_type in ["bus","branch","gen"]
+        for (id, comp) in data[comp_type]
+            for key in keys(comp)
+                if (key in invalid_keys[comp_type])
+                    delete!(comp,key)
+                end
+            end
+        end
+    end
 end
