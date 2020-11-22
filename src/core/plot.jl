@@ -312,7 +312,11 @@ function plot_power_flow_geo(case; spring_constant = 1e-3)
 end
 
 
-function plot_WI(WI)
+function plot_WI()
+    # download from  https://github.com/deldersveld/topojson/blob/master/countries/us-states/WI-55-wisconsin-counties.json
+    file_path = "$(joinpath(dirname(pathof(PowerVega)), ".."))/test/networks/WI-55-wisconsin-counties.json"
+    WI = VegaDatasets.VegaJSONDataset(JSON.parsefile(file_path), Path(file_path))
+
     p =  @vlplot(width=500, height=300) +
      @vlplot(
          mark={
