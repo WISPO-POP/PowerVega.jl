@@ -203,7 +203,6 @@ end
 
 
 function plot_power_flow_geo(case; spring_constant = 1e-3)
-
     for (gen_id,gen) in case["gen"]
         if !haskey(gen,"pg")
             @warn "Generator $(gen_id) does not have key `pg`"
@@ -228,8 +227,6 @@ function plot_power_flow_geo(case; spring_constant = 1e-3)
     remove_information!(data)
     df = form_df(data)
     p = @vlplot(
-        width=500,
-        height=300,
         config={view={stroke=nothing}},
         x={axis=nothing},
         y={axis=nothing},
@@ -312,12 +309,13 @@ function plot_power_flow_geo(case; spring_constant = 1e-3)
 end
 
 
-function plot_WI()
+function plot_WI(;size=(800,600))
     # download from  https://github.com/deldersveld/topojson/blob/master/countries/us-states/WI-55-wisconsin-counties.json
     file_path = "$(joinpath(dirname(pathof(PowerVega)), ".."))/test/networks/WI-55-wisconsin-counties.json"
     WI = VegaDatasets.VegaJSONDataset(JSON.parsefile(file_path), Path(file_path))
 
-    p =  @vlplot(width=500, height=300) +
+    (width,height) = size
+    p =  @vlplot(width=width, height=height) +
      @vlplot(
          mark={
              :geoshape,
